@@ -80,11 +80,8 @@ IOService* AppleGFXHDA::wrapProbe(IOService* that, IOService* provider, SInt32* 
     singleton().controller.provider(that)                   = provider;
     singleton().controller.vendorID(that)                   = vendorID;
     singleton().controller.deviceID(that)                   = deviceID;
-    
-    // Allow both Pin 0 (internal) and Pin 1 (external HDMI) to be detected
-    singleton().controller.integratedCodecAddressMask(that) = 0x3;
-    singleton().controller.codecAddressMask(that)           = 0x3;
-    
+    singleton().controller.integratedCodecAddressMask(that) = 0x1;
+    singleton().controller.codecAddressMask(that)           = 0x1;
     singleton().controller.useRirb(that)                    = true;
     singleton().controller.timeIntervalFilterOrder(that)    = 9;
     singleton().controller.intIndex(that)                   = 1;
@@ -100,10 +97,10 @@ IOService* AppleGFXHDA::wrapProbe(IOService* that, IOService* provider, SInt32* 
 
     *score = 1;
 
-    // Use exact string length without the trailing null character for hda-gfx matching
-    dev->setProperty("hda-gfx", "onboard-1");
+    char hdaGfxBytes[] = "onboard-1";
+    dev->setProperty("hda-gfx", hdaGfxBytes, sizeof(hdaGfxBytes));
 
-    DBGLOG("GFXHDA", "Initialised Raven or Renoir device with multi-endpoint mask.");
+    DBGLOG("GFXHDA", "Initialised Raven or Renoir device.");
 
     return that;
 }
@@ -112,9 +109,21 @@ void* AppleGFXHDA::wrapCreateAppleHDAFunctionGroup(void* devId)
 {
     const auto vendorID = getMember<UInt16>(devId, 0x2);
     const auto deviceID = getMember<UInt32>(devId, 0x8);
+    DBGLOG("GFXHDA", "createAppleHDAFunctionGroup: vendor 0x%X device 0x%X", vendorID, deviceID);
     if (vendorID == AMDVendorID && (deviceID == RavenHDMIDeviceID || deviceID == RenoirHDMIDeviceID)) {
         return singleton().orgFunctionGroupTahiti->alloc();
     }
     return FunctionCast(wrapCreateAppleHDAFunctionGroup, singleton().orgCreateAppleHDAFunctionGroup)(devId);
 }
 
+void* AppleGFXHDA::wrapCreateAppleHDAWidget(void* devId)
+{
+    auto vendorID = getMember<UInt16>(devId, 0x2);
+    auto deviceID = getMember<UInt32>(devId, 0x8);
+    DBGLOG("GFXHDA", "createAppleHDAWidget: vendor 0x%X device 0x%X", vendorID, deviceID);
+    if (vendorID == AMDVendorID && (deviceID == RavenHDMIDeviceID || deviceID == RenoirHDMIDeviceID)) {
+        return singleton().orgWidget1002AAA0->alloc();
+    }
+    // Upstream bug fix: this fallback called the FunctionGroup original instead of the Widget one.
+    return FunctionCast(wrapCreateAppleHDAWidget, singleton().orgCreateAppleHDAWidget)(devId);
+}

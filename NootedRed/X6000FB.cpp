@@ -620,7 +620,7 @@ void* X6000FB::wrapCreateObjectInfo(void* const helper, const UInt32 tableOffset
     const auto n         = infoTable->pathCount;
     for (UInt8 i = 0, j = 0; i < n; i++) {
         // Skip invalid device tags
-        if (infoTable->paths[i].devTag == 0 || (infoTable->paths[i].devTag & 0x02)) { infoTable->pathCount--; }
+        if (infoTable->paths[i].devTag == 0) { infoTable->pathCount--; }
         else {
             infoTable->paths[j++] = infoTable->paths[i];
         }

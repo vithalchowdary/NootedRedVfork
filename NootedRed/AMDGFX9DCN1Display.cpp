@@ -61,10 +61,8 @@ void AMDRadeonX5000_AMDGFX9DCN1Display::initDCNRegOffs(AMDRadeonX5000_AMDGFX9DCN
 {
     auto& expansion = self->getExpansion();
     for (UInt32 i = 0; i < MAX_SUPPORTED_DISPLAYS_RV; i += 1) {
-        // Swap pipe index 0 to physical hardware pipe 1 (DIG_B / external HDMI)
-        const UInt32 hwPipeIndex                 = (i == 0) ? 1 : ((i == 1) ? 0 : i);
-        const UInt32 hubpRegStride               = HUBP_REG_STRIDE * hwPipeIndex;
-        const UInt32 otgRegStride                = OTG_REG_STRIDE * hwPipeIndex;
+        const UInt32 hubpRegStride               = HUBP_REG_STRIDE * i;
+        const UInt32 otgRegStride                = OTG_REG_STRIDE * i;
         auto&        regOffs                     = expansion.regOffs[i];
         regOffs.isValid                          = true;
         regOffs.hubpretControl                   = DCN_BASE_2 + HUBPRET_CONTROL + hubpRegStride;
