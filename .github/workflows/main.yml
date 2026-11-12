@@ -21,7 +21,7 @@ jobs:
     steps:
       - if: github.repository != 'ChefKissInc/NootedRed'
         run: |
-          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+        //  cat << 'EOF' >> $GITHUB_STEP_SUMMARY
           # 🛑 STOP!
 
           ## You were likely sent here by an unofficial, outdated and SHIT tutorial
