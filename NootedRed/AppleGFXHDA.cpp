@@ -118,13 +118,3 @@ void* AppleGFXHDA::wrapCreateAppleHDAFunctionGroup(void* devId)
     return FunctionCast(wrapCreateAppleHDAFunctionGroup, singleton().orgCreateAppleHDAFunctionGroup)(devId);
 }
 
-void* AppleGFXHDA::wrapCreateAppleHDAWidget(void* devId)
-{
-    auto vendorID = getMember<UInt16>(devId, 0x2);
-    auto deviceID = getMember<UInt32>(devId, 0x8);
-    if (vendorID == AMDVendorID && (deviceID == RavenHDMIDeviceID || deviceID == RenoirHDMIDeviceID)) {
-        return singleton().orgWidget1002AAA0->alloc();
-    }
-    // Fixed: Was calling orgCreateAppleHDAFunctionGroup instead of orgCreateAppleHDAWidget
-    return FunctionCast(wrapCreateAppleHDAWidget, singleton().orgCreateAppleHDAWidget)(devId);
-}
